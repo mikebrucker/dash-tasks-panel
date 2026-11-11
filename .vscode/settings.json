@@ -1,0 +1,5 @@
+{
+  "css.lint.validProperties": ["spacing", "offset-y"],
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode"
+}

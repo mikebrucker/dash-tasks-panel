@@ -2,7 +2,7 @@
 
 <schemalist>
 
-    <schema path="/org/gnome/shell/extensions/tasks-in-panel/" id="org.gnome.shell.extensions.tasks-in-panel">
+    <schema path="/org/gnome/shell/extensions/dash-tasks-panel/" id="org.gnome.shell.extensions.dash-tasks-panel">
 
         <key type="b" name="light-style">
             <default>true</default>
@@ -29,6 +29,11 @@
             <summary>Custom background color</summary>
         </key>
 
+        <key type="b" name="move-date">
+            <default>true</default>
+            <summary>Move the clock to the right</summary>
+        </key>
+
         <key type="b" name="scroll-panel">
             <default>true</default>
             <summary>Scroll on panel to change workspace</summary>
@@ -42,16 +47,6 @@
         <key type="b" name="show-show-desktop">
             <default>true</default>
             <summary>Show show desktop button</summary>
-        </key>
-
-        <key type="b" name="move-date">
-            <default>true</default>
-            <summary>Move date menu button to the right</summary>
-        </key>
-
-        <key type="b" name="show-activities">
-            <default>false</default>
-            <summary>Show activities indicator</summary>
         </key>
 
         <key type="b" name="show-workspaces-bar">
@@ -74,20 +69,117 @@
             <summary>Show recent applications menu button</summary>
         </key>
 
+        <key type="b" name="show-dash">
+            <default>true</default>
+            <summary>Show dash before the tasks</summary>
+        </key>
+
+        <key type="s" name="dash-align">
+            <choices>
+                <choice value="left"/>
+                <choice value="center"/>
+                <choice value="right"/>
+            </choices>
+            <default>"left"</default>
+            <summary>Dash alignment</summary>
+        </key>
+
+        <key type="b" name="show-app-grid-button">
+            <default>false</default>
+            <summary>Show app grid button in the dash</summary>
+        </key>
+
+        <key type="b" name="dash-labels-above">
+            <default>false</default>
+            <summary>Show dash hover labels above the icons</summary>
+        </key>
+
+        <key type="i" name="dash-icon-size">
+            <range min="12" max="48"/>
+            <default>20</default>
+            <summary>Dash icon size</summary>
+        </key>
+
+        <key type="i" name="dash-icon-margin">
+            <range min="0" max="20"/>
+            <default>2</default>
+            <summary>Dash app button horizontal margin</summary>
+        </key>
+
+        <key type="b" name="show-dash-separator">
+            <default>true</default>
+            <summary>Show dash separator</summary>
+        </key>
+
+        <key type="i" name="dash-separator-margin">
+            <range min="0" max="16"/>
+            <default>8</default>
+            <summary>Dash separator horizontal margin</summary>
+        </key>
+
+        <key type="b" name="dash-indicator-accent">
+            <default>true</default>
+            <summary>Dash running indicator uses the accent color</summary>
+        </key>
+
+        <key type="b" name="dash-indicator-use-color">
+            <default>false</default>
+            <summary>Use custom dash running indicator color</summary>
+        </key>
+
+        <key type="s" name="dash-indicator-color">
+            <default>"rgba(255,255,255,1)"</default>
+            <summary>Custom dash running indicator color</summary>
+        </key>
+
+        <key type="i" name="dash-indicator-width">
+            <range min="1" max="48"/>
+            <default>20</default>
+            <summary>Dash running indicator width</summary>
+        </key>
+
+        <key type="i" name="dash-indicator-thickness">
+            <range min="1" max="12"/>
+            <default>6</default>
+            <summary>Dash running indicator thickness</summary>
+        </key>
+
+        <key type="i" name="dash-indicator-offset-y">
+            <range min="-12" max="16"/>
+            <default>0</default>
+            <summary>Dash running indicator vertical offset</summary>
+        </key>
+
         <key type="i" name="recent-apps-list-length">
             <range min="1" max="20"/>
             <default>8</default>
             <summary>Recent applications list maximum length</summary>
         </key>
 
-        <key type="b" name="center-tasks">
-            <default>false</default>
-            <summary>Move tasks to the center</summary>
+        <key type="b" name="show-tasks">
+            <default>true</default>
+            <summary>Show tasks</summary>
+        </key>
+
+        <key type="s" name="tasks-align">
+            <choices>
+                <choice value="left"/>
+                <choice value="center"/>
+                <choice value="right"/>
+            </choices>
+            <default>"left"</default>
+            <summary>Tasks alignment</summary>
         </key>
 
         <key type="b" name="show-window-icon">
             <default>true</default>
             <summary>Show window icon inside task button</summary>
+        </key>
+
+        <key type="i" name="task-icon-size">
+            <range min="12" max="48"/>
+            <default>18</default>
+            <summary>Window icon size inside task button</summary>
         </key>
 
         <key type="b" name="show-window-title">

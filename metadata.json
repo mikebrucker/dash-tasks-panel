@@ -1,15 +1,12 @@
 {
-  "description": "Lag-free taskbar that respects the GNOME Shell style.\n\n Light and reliable extension.\n\n Multi-monitor support.\n Hover task to raise its window.\n Right click to show app menu.\n Middle click to open new app window.\n Display Chromium web apps real icons.\n Optional window grouping by app.\n\n Light style.\n Workspaces bar.\n Recent and favorites apps.\n Power profile indicator (until GNOME 49).\n User id indicator.\n\n Settings UI to turn on/off these features and many more. Unused features are not initialized nor loaded.\n Select focused window only in prefs to look like the old app menu or Window Title is Back.\n\n You can toggle the overview in each monitor using Bottom Overview extension.",
-  "name": "Tasks in panel",
+  "description": "Puts the dash and a taskbar in the top panel.\n\nDash: favorite and running apps, optional app grid button, adjustable icons and running indicator. Clicking the focused app minimizes it.\n\nTasks: one button per window. Hover to raise the window, right click for the app menu, middle click to open a new window or to close it. Optional grouping by app. Windows asking for attention turn red.\n\nAlso: workspaces bar, favorites and recent apps menus, show desktop button, user name, light style, accent or custom panel color, clock on the right, and panels on every monitor.\n\nEvery feature can be turned off in the settings; turned-off features are not loaded.\n\nFork of Tasks in panel by fthx.",
+  "name": "Dash and Tasks in panel",
   "shell-version": [
     "50",
     "51"
   ],
-  "url": "https://github.com/fthx/tasks-in-panel",
-  "uuid": "tasks-in-panel@fthx",
-  "settings-schema": "org.gnome.shell.extensions.tasks-in-panel",
-  "version": 999,
-  "donations": {
-    "paypal": "fthx75"
-  }
+  "url": "https://github.com/mikebrucker/dash-tasks-panel",
+  "uuid": "dash-tasks-panel@mikebrucker",
+  "settings-schema": "org.gnome.shell.extensions.dash-tasks-panel",
+  "version": 1
 }
