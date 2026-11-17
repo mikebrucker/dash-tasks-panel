@@ -59,6 +59,18 @@
             <summary>Show +/- to add/remove workspace</summary>
         </key>
 
+        <key type="i" name="workspace-button-height">
+            <range min="0" max="64"/>
+            <default>0</default>
+            <summary>Workspaces bar height in pixels, 0 for the natural height</summary>
+        </key>
+
+        <key type="i" name="workspace-font-size">
+            <range min="50" max="200"/>
+            <default>90</default>
+            <summary>Workspaces bar font size in percent of the panel font</summary>
+        </key>
+
         <key type="b" name="show-favorites-menu">
             <default>true</default>
             <summary>Show favorites menu button</summary>

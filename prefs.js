@@ -166,6 +166,22 @@ export default class TasksInPanelPreferences extends ExtensionPreferences {
       "Show +/- to add/remove workspace",
       "Hidden when GNOME's dynamic workspaces option is active.\nMinus removes the active workspace.",
     );
+    this._addSpinRow(
+      group,
+      settings,
+      "workspace-button-height",
+      "Workspaces bar height",
+      new Gtk.Adjustment({ lower: 0, upper: 64, step_increment: 1 }),
+      "In pixels. 0 keeps the natural height.",
+    );
+    this._addSpinRow(
+      group,
+      settings,
+      "workspace-font-size",
+      "Workspaces bar font size",
+      new Gtk.Adjustment({ lower: 50, upper: 200, step_increment: 5 }),
+      "In percent of the panel font.",
+    );
     this._addSwitchRow(group, settings, "show-favorites-menu", "Show favorites menu button");
     this._addSwitchRow(group, settings, "show-recent-apps-menu", "Show recent applications menu button");
 

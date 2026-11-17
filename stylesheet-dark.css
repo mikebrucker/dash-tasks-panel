@@ -1,29 +1,39 @@
-.plus-minus {
-  padding-left: 0;
-  padding-right: 8px;
-
-  spacing: 4px;
-}
-
 .workspace-button {
-  border-radius: 4px;
+  border-radius: 0;
 
   padding-top: 2px;
-  padding-bottom: 3px;
+  padding-bottom: 2px;
   padding-left: 8px;
   padding-right: 8px;
+}
 
-  margin-left: 0;
-  margin-right: 8px;
+StButton:first-child .workspace-button {
+  border-radius: 999px 0 0 999px;
+  padding-left: 10px;
+}
 
-  font-size: 90%;
+StButton:last-child .workspace-button {
+  border-radius: 0 999px 999px 0;
+  padding-right: 10px;
+}
 
-  transition-duration: 200ms;
+StButton:first-child:last-child .workspace-button {
+  border-radius: 999px;
+}
+
+StButton:first-child .workspace-button,
+StButton:last-child .workspace-button {
+  padding-bottom: 4px;
+}
+
+/* not a plus minus button */
+StButton:first-child .workspace-button-number,
+StButton:last-child .workspace-button-number {
+  padding-bottom: 2px;
 }
 
 .workspace-button:hover {
   background-color: rgba(255, 255, 255, 0.3125);
-  box-shadow: inset 0 0 5px 0 rgba(255, 255, 255, 0.17);
 }
 
 .workspace-button-active {
@@ -33,7 +43,6 @@
 
 .workspace-button-inactive {
   background-color: rgba(255, 255, 255, 0.125);
-  box-shadow: inset 0 0 5px 0 rgba(255, 255, 255, 0.17);
 }
 
 .workspace-button-no-windows {

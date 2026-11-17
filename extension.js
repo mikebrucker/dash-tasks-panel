@@ -28,6 +28,7 @@ const UNFOCUSED_TASK_BUTTON_OPACITY = 128; // 0...255
 const SHOW_DESKTOP_ICON_NAME = "focus-windows-symbolic";
 const FAVORITES_ICON_NAME = "starred-symbolic";
 const RECENT_APPS_ICON_NAME = "document-open-recent-symbolic";
+const MAX_WORKSPACES = 36; // mutter's limit
 
 // GNOME caps the side boxes at half the panel even with an empty center box (date moved away);
 // panel.js calls their allocate() from JS, so an own property can widen each up to the other side box
@@ -352,6 +353,23 @@ class DashButton extends PanelMenu.Button {
   }
 }
 
+// the bin carries the pill look and centers the label, so a custom height keeps the text centered
+function makeWorkspacePill(settings) {
+  const pill = new St.Bin({
+    child: new St.Label({ y_align: Clutter.ActorAlign.CENTER }),
+    style_class: "workspace-button",
+    style: `font-size: ${settings?.get_int("workspace-font-size") ?? 90}%`,
+    reactive: true,
+    track_hover: true,
+    y_align: Clutter.ActorAlign.CENTER,
+  });
+
+  const height = settings?.get_int("workspace-button-height") ?? 0;
+  if (height > 0) pill.height = height;
+
+  return pill;
+}
+
 class WorkspacesBar extends PanelMenu.Button {
   static {
     GObject.registerClass(this);
@@ -366,7 +384,7 @@ class WorkspacesBar extends PanelMenu.Button {
 
     this._box = new St.BoxLayout();
 
-    if (!this._isDynamicWorkspaces && this._settings?.get_boolean("show-plus-minus")) this._makeControlsBox();
+    if (!this._isDynamicWorkspaces && this._settings?.get_boolean("show-plus-minus")) this._makeControls();
 
     this.add_child(this._box);
 
@@ -374,20 +392,40 @@ class WorkspacesBar extends PanelMenu.Button {
       Main.panel.addToStatusArea("workspacesBarButton", this, 0, "left");
   }
 
-  _makeControlsBox() {
-    this._controlsBox = new St.BoxLayout({ y_align: Clutter.ActorAlign.CENTER });
-    this._controlsBox.add_style_class_name("plus-minus");
+  // workspace buttons get inserted between these, so minus and plus end the pill
+  _makeControls() {
+    this._minusButton = this._makeControlButton("−", () => this._removeWorkspace());
+    this._plusButton = this._makeControlButton("+", () => this._addWorkspace());
 
-    this._plusButton = new St.Button({ label: "+" });
-    this._minusButton = new St.Button({ label: "−" });
+    this._updateControls();
+    global.workspace_manager.connectObject("notify::n-workspaces", () => this._updateControls(), this);
+  }
 
-    this._controlsBox.add_child(this._plusButton);
-    this._controlsBox.add_child(this._minusButton);
+  _makeControlButton(text, onClick) {
+    const pill = makeWorkspacePill(this._settings);
+    pill.add_style_class_name("workspace-button-inactive");
+    pill.child.text = text;
 
-    this._plusButton.connect("clicked", () => this._addWorkspace());
-    this._minusButton.connect("clicked", () => this._removeWorkspace());
+    const button = new St.Button({ child: pill });
+    button.connect("clicked", onClick);
 
-    this._box.add_child(this._controlsBox);
+    return button;
+  }
+
+  // minus goes away at one workspace, plus at mutter's maximum
+  _updateControls() {
+    const n = global.workspace_manager.n_workspaces;
+
+    this._showControl(this._minusButton, n > 1, 0);
+    this._showControl(this._plusButton, n < MAX_WORKSPACES, -1);
+  }
+
+  // removed rather than hidden, so the neighbouring number becomes :first-child/:last-child and gets the pill end
+  _showControl(button, shown, index) {
+    if (shown === (button.get_parent() === this._box)) return;
+
+    if (shown) this._box.insert_child_at_index(button, index);
+    else this._box.remove_child(button);
   }
 
   _addWorkspace() {
@@ -407,13 +445,13 @@ class WorkspaceButton extends St.Button {
     GObject.registerClass(this);
   }
 
-  constructor(workspace, isDynamicWorkspaces) {
+  constructor(workspace, isDynamicWorkspaces, settings) {
     super();
 
     this._workspace = workspace;
     this._isDynamicWorkspaces = isDynamicWorkspaces;
 
-    this._makeButtonBox();
+    this._makeButtonBox(settings);
 
     this._updateIndex();
     this._updateFocus();
@@ -426,7 +464,7 @@ class WorkspaceButton extends St.Button {
       "active-workspace-changed",
       () => this._updateFocus(),
       "notify::n-workspaces",
-      () => this._onWorkspaceRemoved(),
+      () => this._onWorkspacesChanged(),
       this,
     );
     this._workspace?.connectObject(
@@ -440,11 +478,11 @@ class WorkspaceButton extends St.Button {
     this.connect("clicked", () => this._onClick());
   }
 
-  _makeButtonBox() {
-    this._workspaceIndex = new St.Label({ reactive: true, track_hover: true, y_align: Clutter.ActorAlign.CENTER });
-    this._workspaceIndex.add_style_class_name("workspace-button");
+  _makeButtonBox(settings) {
+    this._pill = makeWorkspacePill(settings);
+    this._pill.add_style_class_name("workspace-button-number");
 
-    this.add_child(this._workspaceIndex);
+    this.add_child(this._pill);
   }
 
   _onClick() {
@@ -454,11 +492,11 @@ class WorkspaceButton extends St.Button {
 
   _updateFocus() {
     if (this._workspace?.active) {
-      this._workspaceIndex?.remove_style_class_name("workspace-button-inactive");
-      this._workspaceIndex?.add_style_class_name("workspace-button-active");
+      this._pill?.remove_style_class_name("workspace-button-inactive");
+      this._pill?.add_style_class_name("workspace-button-active");
     } else {
-      this._workspaceIndex?.remove_style_class_name("workspace-button-active");
-      this._workspaceIndex?.add_style_class_name("workspace-button-inactive");
+      this._pill?.remove_style_class_name("workspace-button-active");
+      this._pill?.add_style_class_name("workspace-button-inactive");
     }
 
     this._updateOpacity();
@@ -468,12 +506,22 @@ class WorkspaceButton extends St.Button {
     const hasWindows = this._workspace.list_windows().some(w => !w.is_on_all_workspaces());
 
     if (!hasWindows && !this._workspace.active && !this._isDynamicWorkspaces)
-      this._workspaceIndex?.add_style_class_name("workspace-button-no-windows");
-    else this._workspaceIndex?.remove_style_class_name("workspace-button-no-windows");
+      this._pill?.add_style_class_name("workspace-button-no-windows");
+    else this._pill?.remove_style_class_name("workspace-button-no-windows");
   }
 
   _updateIndex() {
-    if (this._workspace && this._isWorkspaceMapped()) this._workspaceIndex.text = `${this._workspace.index() + 1}`;
+    if (!this._workspace || !this._isWorkspaceMapped()) return;
+
+    const index = this._workspace.index();
+    // dynamic workspaces always keep an empty one at the end; "+" unless it's the only one
+    const isSpare = this._isDynamicWorkspaces && index > 0 && index === global.workspace_manager.n_workspaces - 1;
+
+    this._pill.child.text = isSpare ? "+" : `${index + 1}`;
+
+    // the spare "+" gets the plus button's lift, not the number padding
+    if (isSpare) this._pill.remove_style_class_name("workspace-button-number");
+    else this._pill.add_style_class_name("workspace-button-number");
   }
 
   _isWorkspaceMapped() {
@@ -486,8 +534,9 @@ class WorkspaceButton extends St.Button {
     return false;
   }
 
-  _onWorkspaceRemoved() {
+  _onWorkspacesChanged() {
     if (!this._workspace || !this._isWorkspaceMapped()) this.destroy();
+    else this._updateIndex();
   }
 }
 
@@ -1016,7 +1065,11 @@ class TasksInPanel extends GObject.Object {
       if (workspace === bin?._workspace) return;
     }
 
-    this._workspacesBar._box.add_child(new WorkspaceButton(workspace, this._isDynamicWorkspaces));
+    const button = new WorkspaceButton(workspace, this._isDynamicWorkspaces, this._settings);
+    const plusButton = this._workspacesBar._plusButton;
+
+    if (plusButton?.get_parent()) this._workspacesBar._box.insert_child_below(button, plusButton);
+    else this._workspacesBar._box.add_child(button);
   }
 
   _makeTaskbar() {
