@@ -217,6 +217,13 @@ class AppsMenuButton extends PanelMenu.Button {
   }
 }
 
+// light mode is the variant GNOME Shell picks stylesheet-light.css with
+function customColor(settings, key, useKey) {
+  if (Main.getStyleVariant() === "light" && settings.get_boolean(`${useKey}-light`))
+    return settings.get_string(`${key}-light`);
+  return settings.get_string(key);
+}
+
 class DashButton extends PanelMenu.Button {
   static {
     GObject.registerClass(this);
@@ -236,7 +243,7 @@ class DashButton extends PanelMenu.Button {
       ` height: ${settings?.get_int("dash-indicator-thickness")}px;` +
       ` offset-y: ${-(settings?.get_int("dash-indicator-offset-y") ?? 0)}px;`;
     if (settings?.get_boolean("dash-indicator-use-color"))
-      this._dotStyle += ` background-color: ${settings.get_string("dash-indicator-color")};`;
+      this._dotStyle += ` background-color: ${customColor(settings, "dash-indicator-color", "dash-indicator-use-color")};`;
     this._dotAccent = settings?.get_boolean("dash-indicator-accent");
 
     this._dash = new Dash();
@@ -353,19 +360,35 @@ class DashButton extends PanelMenu.Button {
   }
 }
 
-// the bin carries the pill look and centers the label, so a custom height keeps the text centered
+// the bin carries the pill look and centers the label; a height below the text's shrinks the font to fit
 function makeWorkspacePill(settings) {
+  // inline on the label itself, so it beats the yaru-like panel's "normal" on every panel-button descendant
+  const weight = `font-weight: ${settings?.get_boolean("workspace-font-bold") ? "bold" : "normal"};`;
+  const label = new St.Label({ style: weight, y_align: Clutter.ActorAlign.CENTER });
+
   const pill = new St.Bin({
-    child: new St.Label({ y_align: Clutter.ActorAlign.CENTER }),
+    child: label,
     style_class: "workspace-button",
-    style: `font-size: ${settings?.get_int("workspace-font-size") ?? 90}%`,
+    style: `font-size: ${settings?.get_int("workspace-font-size") ?? 90}%;`,
     reactive: true,
     track_hover: true,
     y_align: Clutter.ActorAlign.CENTER,
   });
 
   const height = settings?.get_int("workspace-button-height") ?? 0;
-  if (height > 0) pill.height = height;
+  if (height > 0) {
+    pill.height = height;
+
+    // the text box is only known once styled (after: the label applies its font in the class handler);
+    // re-runs after each shrink until it fits, and an unchanged style is a no-op
+    let scale = 100;
+    label.connect_after("style-changed", () => {
+      const [, textHeight] = label.get_preferred_height(-1);
+      if (textHeight <= height) return;
+      scale = Math.max(1, Math.floor((scale * height) / textHeight));
+      label.style = `${weight} font-size: ${scale}%;`;
+    });
+  }
 
   return pill;
 }
@@ -480,7 +503,6 @@ class WorkspaceButton extends St.Button {
 
   _makeButtonBox(settings) {
     this._pill = makeWorkspacePill(settings);
-    this._pill.add_style_class_name("workspace-button-number");
 
     this.add_child(this._pill);
   }
@@ -518,10 +540,6 @@ class WorkspaceButton extends St.Button {
     const isSpare = this._isDynamicWorkspaces && index > 0 && index === global.workspace_manager.n_workspaces - 1;
 
     this._pill.child.text = isSpare ? "+" : `${index + 1}`;
-
-    // the spare "+" gets the plus button's lift, not the number padding
-    if (isSpare) this._pill.remove_style_class_name("workspace-button-number");
-    else this._pill.add_style_class_name("workspace-button-number");
   }
 
   _isWorkspaceMapped() {
@@ -911,8 +929,11 @@ class TasksInPanel extends GObject.Object {
       }
     }
 
+    // first: it decides the light/dark variant the custom colors follow
+    if (this._settings?.get_boolean("light-style")) this._lightStyleMode = new LightStyleMode();
+
     if (this._settings?.get_boolean("use-background-color"))
-      this._panelStyle = `background-color: ${this._settings?.get_string("background-color")}`;
+      this._panelStyle = `background-color: ${customColor(this._settings, "background-color", "use-background-color")}`;
 
     for (const panel of [Main.panel, ...this._panels.values()]) {
       widenSideBoxes(panel);
@@ -928,8 +949,6 @@ class TasksInPanel extends GObject.Object {
     }
 
     if (this._settings?.get_boolean("move-date")) this._moveDate();
-
-    if (this._settings?.get_boolean("light-style")) this._lightStyleMode = new LightStyleMode();
 
     if (this._settings?.get_boolean("show-user-id")) this._userIdButton = new UserIdButton();
 
@@ -1171,6 +1190,19 @@ export default class TasksInPanelExtension extends Extension {
       Main.layoutManager.connectObject("monitors-changed", () => this._restart(), this);
 
     this._tasksInPanel = new TasksInPanel(this._settings, this._recentAppIds);
+
+    // connected after the light style mode's own notify, and only a real variant change rebuilds
+    if (
+      this._settings?.get_boolean("use-background-color-light") ||
+      this._settings?.get_boolean("dash-indicator-use-color-light")
+    ) {
+      const variant = Main.getStyleVariant();
+      St.Settings.get().connectObject(
+        "notify::color-scheme",
+        () => Main.getStyleVariant() !== variant && this._restart(),
+        this,
+      );
+    }
   }
 
   disable() {
@@ -1178,6 +1210,7 @@ export default class TasksInPanelExtension extends Extension {
     this._restartTimeout = null;
 
     Main.layoutManager.disconnectObject(this);
+    St.Settings.get().disconnectObject(this);
 
     this._settings?.disconnectObject(this);
     this._settings = null;

@@ -29,6 +29,16 @@
             <summary>Custom background color</summary>
         </key>
 
+        <key type="b" name="use-background-color-light">
+            <default>false</default>
+            <summary>Custom light mode background color</summary>
+        </key>
+
+        <key name="background-color-light" type="s">
+            <default>"rgba(255,255,255,1)"</default>
+            <summary>Custom light mode background color</summary>
+        </key>
+
         <key type="b" name="move-date">
             <default>true</default>
             <summary>Move the clock to the right</summary>
@@ -69,6 +79,11 @@
             <range min="50" max="200"/>
             <default>90</default>
             <summary>Workspaces bar font size in percent of the panel font</summary>
+        </key>
+
+        <key type="b" name="workspace-font-bold">
+            <default>false</default>
+            <summary>Workspaces bar uses bold font</summary>
         </key>
 
         <key type="b" name="show-favorites-menu">
@@ -142,6 +157,16 @@
         <key type="s" name="dash-indicator-color">
             <default>"rgba(255,255,255,1)"</default>
             <summary>Custom dash running indicator color</summary>
+        </key>
+
+        <key type="b" name="dash-indicator-use-color-light">
+            <default>false</default>
+            <summary>Use custom light mode dash running indicator color</summary>
+        </key>
+
+        <key type="s" name="dash-indicator-color-light">
+            <default>"rgba(0,0,0,1)"</default>
+            <summary>Custom light mode dash running indicator color</summary>
         </key>
 
         <key type="i" name="dash-indicator-width">

@@ -116,7 +116,21 @@ export default class TasksInPanelPreferences extends ExtensionPreferences {
         "background-color",
         "use-background-color",
         "Custom background color",
-        "Dark/light setting does not affect this color.",
+      ),
+    );
+    this._addSwitchRow(
+      group,
+      settings,
+      "use-background-color-light",
+      "Use light mode background color",
+      "Replaces the custom color while GNOME Shell is light.",
+    );
+    group.add(
+      this._buildColorRow(
+        settings,
+        "background-color-light",
+        "use-background-color-light",
+        "Light mode background color",
       ),
     );
 
@@ -182,6 +196,7 @@ export default class TasksInPanelPreferences extends ExtensionPreferences {
       new Gtk.Adjustment({ lower: 50, upper: 200, step_increment: 5 }),
       "In percent of the panel font.",
     );
+    this._addSwitchRow(group, settings, "workspace-font-bold", "Workspaces bar bold font");
     this._addSwitchRow(group, settings, "show-favorites-menu", "Show favorites menu button");
     this._addSwitchRow(group, settings, "show-recent-apps-menu", "Show recent applications menu button");
 
@@ -250,6 +265,21 @@ export default class TasksInPanelPreferences extends ExtensionPreferences {
         "dash-indicator-color",
         "dash-indicator-use-color",
         "Custom running indicator color",
+      ),
+    );
+    this._addSwitchRow(
+      group,
+      settings,
+      "dash-indicator-use-color-light",
+      "Use light mode running indicator color",
+      "Replaces the custom color while GNOME Shell is light.",
+    );
+    group.add(
+      this._buildColorRow(
+        settings,
+        "dash-indicator-color-light",
+        "dash-indicator-use-color-light",
+        "Light mode running indicator color",
       ),
     );
     this._makeExclusive(settings, "dash-indicator-accent", "dash-indicator-use-color");

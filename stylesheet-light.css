@@ -1,8 +1,7 @@
 .workspace-button {
   border-radius: 0;
+  font-feature-settings: "tnum", "case";
 
-  padding-top: 2px;
-  padding-bottom: 2px;
   padding-left: 8px;
   padding-right: 8px;
 }
@@ -19,17 +18,6 @@ StButton:last-child .workspace-button {
 
 StButton:first-child:last-child .workspace-button {
   border-radius: 999px;
-}
-
-StButton:first-child .workspace-button,
-StButton:last-child .workspace-button {
-  padding-bottom: 4px;
-}
-
-/* not a plus minus button */
-StButton:first-child .workspace-button-number,
-StButton:last-child .workspace-button-number {
-  padding-bottom: 2px;
 }
 
 .workspace-button:hover {
